@@ -3,9 +3,12 @@ using System.Collections;
 using UnityEngine.UI;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
+using GoogleMobileAds.Api;
 
 public class gameEngine : MonoBehaviour {
+	public bool TestAds = true;
 	public GameObject player;
+	public Animator border;
 	public Image healthCounter;
 	public float rangeSpeed = 5.0f;
 	public float playerSpeed = 5.0f;
@@ -55,6 +58,8 @@ public class gameEngine : MonoBehaviour {
 	float endHealth;
 	float newHealthAmount;
 	float bestScore = 0;
+
+	private InterstitialAd interstitial;
 	
 	// Use this for initialization
 	void Start () {
@@ -63,6 +68,7 @@ public class gameEngine : MonoBehaviour {
 		health = 100.0f;
 		anim = player.GetComponent<Animator>();
 		playerRealSpeed = playerSpeed;
+		RequestInterstitial();
 	}
 	
 	// Update is called once per frame
@@ -180,11 +186,16 @@ public class gameEngine : MonoBehaviour {
 		if(isInvulnerable)
 		{
 			Debug.Log(invulnerableTimer + " " + timerInVulnurable);
-			if(timerInVulnurable > 0) timerInVulnurable -= Time.deltaTime;
+			if(timerInVulnurable > 0) 
+			{
+				timerInVulnurable -= Time.deltaTime;
+				border.gameObject.SetActive(true);
+			}
 			else
 			{
 				timerInVulnurable = invulnerableTimer;
 				isInvulnerable = false;
+				border.gameObject.SetActive(false);
 			}
 		}
 		if(isHealing)
@@ -227,6 +238,10 @@ public class gameEngine : MonoBehaviour {
 		GameObject.Find("BestScore").GetComponent<Text>().text = "Best Score: " + bestScore.ToString();
 		isStopped = true;
 		GetComponent<spawnManager>().isSpawn = false;
+
+		// Ads section
+
+		if(interstitial.IsLoaded()) interstitial.Show();
 	}
 
 	public void Orbit(planets obj)
@@ -366,6 +381,24 @@ public class gameEngine : MonoBehaviour {
     }
 	//Debug.LogError("[GameEngine.FindPath] ERROR no path found");
     return "";
+	}
+
+	private void RequestInterstitial()
+	{
+   	 	#if UNITY_ANDROID
+			string adUnitId;
+       		if(!TestAds) adUnitId = "ca-app-pub-7331899533603518/3362036107";
+			else adUnitId = "ca-app-pub-3940256099942544/1033173712";
+   	 	/*#elif UNITY_IPHONE
+       		adUnitId = "ca-app-pub-3940256099942544/4411468910";*/
+   	 	#else
+        	string adUnitId = "unexpected_platform";
+    	#endif
+
+    	// Initialize an InterstitialAd.
+    	this.interstitial = new InterstitialAd(adUnitId);
+		AdRequest request = new AdRequest.Builder().AddTestDevice("	ca-app-pub-3940256099942544/1033173712").Build();
+		this.interstitial.LoadAd(request);
 	}
 }
 
