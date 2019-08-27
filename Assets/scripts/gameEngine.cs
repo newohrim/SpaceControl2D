@@ -5,6 +5,7 @@ using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
 using GoogleMobileAds.Api;
 
+
 public class gameEngine : MonoBehaviour {
 	public bool TestAds = true;
 	public GameObject player;
@@ -91,8 +92,11 @@ public class gameEngine : MonoBehaviour {
 			if(health <= 0)
 			{
 				Debug.Log("Game Over");
-				if (score > bestScore) SaveScore(); 
-
+				if (score > bestScore) 
+				{
+					SaveScore();
+					leaderboard.AddScoreToLeaderboard(GPGSIds.leaderboard_best_scores_world, (long)bestScore);
+				}
 				GameOver();
 			}
 
