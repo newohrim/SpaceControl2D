@@ -5,6 +5,8 @@ using UnityEngine.SceneManagement;
 
 public class fading : MonoBehaviour {
 
+	public GameObject leaderboardButton;
+
 	public void Fade(int n)
 	{
 		switch(n)
@@ -14,4 +16,9 @@ public class fading : MonoBehaviour {
 			break;
 		}
 	}
+
+	public void DestroyLeaderboardButton()
+    {
+        Destroy(leaderboardButton);
+    }
 }
