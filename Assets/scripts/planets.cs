@@ -3,12 +3,13 @@ using System.Collections;
 using UnityEngine.UI;
 
 public class planets : MonoBehaviour {
+	public GameObject TestSpot;
 	public const float ViewDistance = 25.0f;
 	public PlanetType Type;
 	public GameObject pl, cam;
 	public Image powerCounter;
-	public float force, inForce;
-	public float maxSpeed = 5.0f;
+	public float force;
+	public static float orbitOffset = 0.5f;
 	public float gravityNeed;
 	//Rigidbody2D rig;
 	Animator anim;
@@ -26,7 +27,6 @@ public class planets : MonoBehaviour {
 	float alpha = 0;
 	float timer = 0.0f;
 	public float timerSpeed = 1.0f;
-	public float orbitOffset;
 	int n = 0;
 
 	public enum PlanetType
@@ -45,7 +45,7 @@ public class planets : MonoBehaviour {
 	}
 	
 	// Update is called once per frame
-	void Update () {
+	void FixedUpdate () {
 		if (isDeOrbit) DeOrbit();
 
 		//float speed = rig.velocity.magnitude;
@@ -74,25 +74,38 @@ public class planets : MonoBehaviour {
 			if(isOrbited){
 			if(n == 0) 
 			{
+				/*
 				Vector3 line = transform.position - pl.transform.position;
 				alpha = Vector3.Angle(line, Vector3.right);
 				if(Mathf.Sin(alpha) < 0) alpha = 2 * Mathf.PI - alpha;
+				alpha = Mathf.PI * alpha / 180;
+				*/
+
+				Vector3 line = transform.position - pl.transform.position;
+				alpha = Vector3.Angle(line, Vector3.right);
+				if (transform.position.y < pl.transform.position.y) 
+				{
+					alpha = 360 - alpha;
+				}
 				alpha = Mathf.PI * alpha / 180;
 				n = 1;
 			}
 
 			//alpha = alpha + (force * Time.deltaTime); // alpha angle is not moving when n = 1
-			Vector3 newPos = OrbitalPosition(alpha, orbitLevel, pl);
-
+			Vector3 newPos = OrbitalPosition(alpha, orbitLevel, pl.transform.position);
+			
 			if(n == 1)
 			{
 				//Debug.Log(orbitLevel);
-				if(Vector3.Distance(transform.position, pl.transform.position) > orbitLevel + 0.5f)
+				if(Vector3.Distance(transform.position, newPos) > 0.1f)
 				{
-					transform.position = Vector3.Lerp(transform.position, newPos, 0.1f);
+					Debug.Log(gameObject.name + " " + Vector3.Distance(transform.position, newPos));
+					//transform.position = Vector3.Lerp(transform.position, newPos, 0.1f);
+					transform.Translate((newPos - transform.position).normalized * 10 * Time.deltaTime);
+					alpha = alpha + (force * Time.deltaTime);
 				}
-				else {
-					//Debug.Log("break");
+				else 
+				{
 					n = 2;
 				}
 			}
@@ -109,7 +122,7 @@ public class planets : MonoBehaviour {
 		}
 	}
 
-	public static Vector3 OrbitalPosition(float angle, float radius, GameObject center)
+	public static Vector3 OrbitalPosition(float angle, float radius, Vector3 center)
 	{
 		//float sub_angle = angle;
 
@@ -118,10 +131,10 @@ public class planets : MonoBehaviour {
 
 		//if (sinA < 0) sub_angle = 2 * Mathf.PI - angle;
 
-		float a = center.transform.position.x;
-		float b = center.transform.position.y;
-		float x = (radius + 0.5f) * Mathf.Cos(angle) + a;
-		float y = (radius + 0.5f) * Mathf.Sin(angle) + b;
+		float a = center.x;
+		float b = center.y;
+		float x = (radius + orbitOffset) * Mathf.Cos(angle) + a;
+		float y = (radius + orbitOffset) * Mathf.Sin(angle) + b;
 		Vector3 pos = new Vector3(x, y, 0);
 		return pos;
 	}

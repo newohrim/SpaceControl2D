@@ -1,12 +1,11 @@
-﻿using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
-public class Asteroid : MonoBehaviour, IAsteroid {
-	public float damage;
-	public float speed;
-	public float deltaPower;
-	public GameObject explosion;
+public class GreenAsteroid : MonoBehaviour, IAsteroid {
+	public GameObject Instance { get { return gameObject; } }
+
+    public GameObject explosion;
+    public float speed;
+    public float healthAmount;
 
 	Vector3 direction;
 	
@@ -21,7 +20,6 @@ public class Asteroid : MonoBehaviour, IAsteroid {
 	
 	// Update is called once per frame
 	void FixedUpdate () {
-		//direction = player.position - transform.position;
 		transform.Translate(direction.normalized * speed * Time.deltaTime);
 	}
 
@@ -40,18 +38,15 @@ public class Asteroid : MonoBehaviour, IAsteroid {
 	public void HitPlayer(Collision2D col)
 	{
 		player.GetComponent<Animator>().PlayInFixedTime("SimpleHit");
-		game.GetDamage(damage);
+		game.AddHealth(healthAmount);
 		Destroy(gameObject);
 	}
 
 	public void HitPlanet(Collision2D col)
 	{
-		if(col.gameObject.GetComponent<planets>().isOrbited)
-		{
-			GameObject obj = Instantiate(explosion, transform.position, Quaternion.identity) as GameObject;
-			Destroy(obj, 2);
-			col.gameObject.GetComponent<planets>().AddPower(deltaPower);
-			Destroy(gameObject);
-		}
+        // Nothing happens
+        GameObject obj = Instantiate(explosion, transform.position, Quaternion.identity) as GameObject;
+		Destroy(obj, 2);
+        Destroy(gameObject);
 	}
 }

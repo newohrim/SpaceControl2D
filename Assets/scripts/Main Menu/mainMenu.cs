@@ -33,7 +33,7 @@ public class mainMenu : MonoBehaviour {
 			if(Moons[i] != null)
 			{
 				angle[i] += rotateSpeed * Time.deltaTime;
-				Moons[i].position = planets.OrbitalPosition(angle[i], i + 2, Earth);
+				Moons[i].position = planets.OrbitalPosition(angle[i], i + 2, Earth.transform.position);
 			}
 		}
 

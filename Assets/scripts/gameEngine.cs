@@ -13,6 +13,7 @@ public class gameEngine : MonoBehaviour {
 	public Image healthCounter;
 	public float rangeSpeed = 5.0f;
 	public float playerSpeed = 5.0f;
+	public const float MaxHealth = 100f;
 	public float cameraSpeed = 0.2f;
 	public float backgroundSpeed = 0.1f;
 	public Animator shopPanel;
@@ -47,6 +48,8 @@ public class gameEngine : MonoBehaviour {
 		float timerSpeedBoost;
 	// [/end]
 
+	public Vector3 MoveSpot { get; set; }
+
 	Vector3 mousePos, direction, prevPos;
 	Animator anim;
 	Vector2 prevOffset;
@@ -66,7 +69,7 @@ public class gameEngine : MonoBehaviour {
 	void Start () {
 		LoadScore();
 		Debug.Log("Best Score: " + bestScore);
-		health = 100.0f;
+		health = MaxHealth;
 		anim = player.GetComponent<Animator>();
 		playerRealSpeed = playerSpeed;
 		RequestInterstitial();
@@ -113,6 +116,8 @@ public class gameEngine : MonoBehaviour {
 			}
 			if(i == 1)
 			{
+				MoveSpot = player.transform.position + new Vector3(direction.x, direction.y, 0) * playerSpeed;
+				Debug.DrawLine(player.transform.position, MoveSpot, Color.green);
 				player.transform.Translate (new Vector3(direction.x, direction.y, 0) * playerRealSpeed * Time.deltaTime);
 				i = 0;
 			}
@@ -176,10 +181,9 @@ public class gameEngine : MonoBehaviour {
 							timerSpeedBoost = speedBoostTime;
 							player.GetComponent<TrailRenderer>().enabled = true;
 						}
-
-						pl.GetComponent<Animator>().Play("munDestroy");
-						GetComponent<spawnManager>().munCount--;
 					}
+					pl.GetComponent<Animator>().Play("munDestroy");
+					GetComponent<spawnManager>().munCount--;
 				}
 			}
 		}
@@ -204,7 +208,7 @@ public class gameEngine : MonoBehaviour {
 		}
 		if(isHealing)
 		{	
-			if(health < endHealth && health <= 100)
+			if(health < endHealth && health <= MaxHealth)
 			{
 				health += healSpeed * Time.deltaTime;
 				anim.Play("healing");
@@ -215,9 +219,9 @@ public class gameEngine : MonoBehaviour {
 				anim.Play("New State");
 			}
 
-			if(health > 100) health = 100;
+			if(health > MaxHealth) health = MaxHealth;
 
-			healthCounter.fillAmount = health / 100;
+			healthCounter.fillAmount = health / MaxHealth;
 		}
 		if(isSpeedBoosted)
 		{
@@ -305,7 +309,14 @@ public class gameEngine : MonoBehaviour {
 		}
 		if(isInvulnerable) score += damage / 5;
 
-		healthCounter.fillAmount = health / 100;
+		healthCounter.fillAmount = health / MaxHealth;
+	}
+
+	public void AddHealth(float healthAmount)
+	{
+		health += healthAmount;
+		if (healthAmount > MaxHealth)
+			health = MaxHealth;
 	}
 
 	public void OnButtonEnter(string func)
