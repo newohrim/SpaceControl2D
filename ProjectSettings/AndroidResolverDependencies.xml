@@ -35,7 +35,7 @@
     <file>Assets/Plugins/Android/com.google.android.gms.play-services-ads-18.1.1.aar</file>
     <file>Assets/Plugins/Android/com.google.android.gms.play-services-ads-base-18.1.1.aar</file>
     <file>Assets/Plugins/Android/com.google.android.gms.play-services-ads-identifier-17.0.0.aar</file>
-    <file>Assets/Plugins/Android/com.google.android.gms.play-services-ads-lite-18.1.1</file>
+    <file>Assets/Plugins/Android/com.google.android.gms.play-services-ads-lite-18.1.1.aar</file>
     <file>Assets/Plugins/Android/com.google.android.gms.play-services-auth-16.0.1.aar</file>
     <file>Assets/Plugins/Android/com.google.android.gms.play-services-auth-api-phone-16.0.0.aar</file>
     <file>Assets/Plugins/Android/com.google.android.gms.play-services-auth-base-16.0.0.aar</file>
@@ -52,13 +52,13 @@
     <file>Assets/Plugins/Android/com.google.android.gms.play-services-nearby-16.0.0.aar</file>
     <file>Assets/Plugins/Android/com.google.android.gms.play-services-stats-17.0.0.aar</file>
     <file>Assets/Plugins/Android/com.google.android.gms.play-services-tasks-16.0.1.aar</file>
-    <file>Assets/Plugins/Android/com.google.games.gpgs-plugin-support-0.9.64</file>
+    <file>Assets/Plugins/Android/com.google.games.gpgs-plugin-support-0.9.64.aar</file>
   </files>
   <settings>
     <setting name="androidAbis" value="armeabi-v7a,x86" />
     <setting name="bundleId" value="com.TripleAxis.SpaceControl2D" />
     <setting name="explodeAars" value="True" />
-    <setting name="gradleBuildEnabled" value="False" />
+    <setting name="gradleBuildEnabled" value="True" />
     <setting name="gradleTemplateEnabled" value="False" />
     <setting name="installAndroidPackages" value="True" />
     <setting name="packageDir" value="Assets\Plugins\Android" />
