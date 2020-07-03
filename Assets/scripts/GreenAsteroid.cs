@@ -37,7 +37,7 @@ public class GreenAsteroid : MonoBehaviour, IAsteroid {
 
 	public void HitPlayer(Collision2D col)
 	{
-		player.GetComponent<Animator>().PlayInFixedTime("SimpleHit");
+		player.GetComponent<Animator>().PlayInFixedTime("GreenHit");
 		game.AddHealth(healthAmount);
 		Destroy(gameObject);
 	}

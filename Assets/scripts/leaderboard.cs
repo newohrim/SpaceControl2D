@@ -20,6 +20,9 @@ public class leaderboard : MonoBehaviour
         PlayGamesPlatform.Activate();
 
         SignIn();
+
+        //PlayGamesPlatform.Activate();
+        //SignIn();
     }
     // Update is called once per frame
     void SignIn()
@@ -38,6 +41,7 @@ public class leaderboard : MonoBehaviour
 
     public void ShowLeaderboard()
     {
+        Debug.Log("show leaderboard");
         Social.ShowLeaderboardUI();
     }
 }

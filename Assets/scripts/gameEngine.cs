@@ -248,7 +248,7 @@ public class gameEngine : MonoBehaviour {
 		GetComponent<spawnManager>().isSpawn = false;
 
 		// Ads section
-
+		if(score < 10) return;
 		if(interstitial.IsLoaded()) interstitial.Show();
 	}
 
