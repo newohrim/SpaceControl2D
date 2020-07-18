@@ -39,8 +39,7 @@ public class Asteroid : MonoBehaviour, IAsteroid {
 
 	public void HitPlayer(Collision2D col)
 	{
-		player.GetComponent<Animator>().PlayInFixedTime("SimpleHit");
-		game.GetDamage(damage);
+		game.OnHitHandler(damage);
 		Destroy(gameObject);
 	}
 

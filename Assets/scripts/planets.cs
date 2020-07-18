@@ -28,6 +28,8 @@ public class planets : MonoBehaviour {
 	float timer = 0.0f;
 	public float timerSpeed = 1.0f;
 	int n = 0;
+	bool isResized = false;
+	Vector3 startSize, prevSize;
 
 	public enum PlanetType
 	{
@@ -42,13 +44,17 @@ public class planets : MonoBehaviour {
 		cam = GameObject.FindGameObjectWithTag("MainCamera");
 		//rig = GetComponent<Rigidbody2D> ();
 		anim = GetComponent<Animator>();
+		anim.enabled = false;
+		startSize = transform.localScale;
+		transform.localScale = new Vector3(0.01f, 0.01f, 1);
 	}
 	
 	// Update is called once per frame
 	void FixedUpdate () {
 		if (isDeOrbit) DeOrbit();
+		if (!isResized)
+			ResizeAnim();
 
-		//float speed = rig.velocity.magnitude;
 		float plDistance = Vector3.Distance (transform.position, pl.transform.position);
 
 		if(plDistance > ViewDistance)
@@ -57,30 +63,18 @@ public class planets : MonoBehaviour {
 			Destroy(gameObject);
 		}
 
-		if(isOrbited)
+		if (!isOrbited && plDistance <= gravityNeed) 
 		{
-			score += Time.deltaTime * scoreSpeed * orbitLevel;
-		}
-		//if (plDistance > ViewDistance) Destroy(gameObject);
-		if (plDistance <= gravityNeed) 
-		{
-
-			if (!isOrbited && Camera.main.GetComponent<gameEngine>().FindOrbit()) //если есть свободные орбиты
+			if (Camera.main.GetComponent<gameEngine>().FindOrbit()) //если есть свободные орбиты
 			{
 				Camera.main.GetComponent<gameEngine> ().Orbit (this); // need a fix [ERROR] || 29.04.19 UPD: need to fix perfomance
 				isOrbited = true;
 			}
-
-			if(isOrbited){
+		}
+		if (isOrbited) 
+		{
 			if(n == 0) 
 			{
-				/*
-				Vector3 line = transform.position - pl.transform.position;
-				alpha = Vector3.Angle(line, Vector3.right);
-				if(Mathf.Sin(alpha) < 0) alpha = 2 * Mathf.PI - alpha;
-				alpha = Mathf.PI * alpha / 180;
-				*/
-
 				Vector3 line = transform.position - pl.transform.position;
 				alpha = Vector3.Angle(line, Vector3.right);
 				if (transform.position.y < pl.transform.position.y) 
@@ -99,7 +93,6 @@ public class planets : MonoBehaviour {
 				//Debug.Log(orbitLevel);
 				if(Vector3.Distance(transform.position, newPos) > 0.1f)
 				{
-					Debug.Log(gameObject.name + " " + Vector3.Distance(transform.position, newPos));
 					//transform.position = Vector3.Lerp(transform.position, newPos, 0.1f);
 					transform.Translate((newPos - transform.position).normalized * 10 * Time.deltaTime);
 					alpha = alpha + (force * Time.deltaTime);
@@ -114,8 +107,6 @@ public class planets : MonoBehaviour {
 				alpha = alpha + (force * Time.deltaTime);
 				transform.position = newPos;
 			}
-			}
-
 		} else if(isOrbited) {
 			//Camera.main.GetComponent<gameEngine> ().DeOrbit (this);
 			//isOrbited = false;
@@ -124,13 +115,6 @@ public class planets : MonoBehaviour {
 
 	public static Vector3 OrbitalPosition(float angle, float radius, Vector3 center)
 	{
-		//float sub_angle = angle;
-
-		//float cosA = Mathf.Cos(angle);
-		//float sinA = Mathf.Sin(angle);
-
-		//if (sinA < 0) sub_angle = 2 * Mathf.PI - angle;
-
 		float a = center.x;
 		float b = center.y;
 		float x = (radius + orbitOffset) * Mathf.Cos(angle) + a;
@@ -160,5 +144,17 @@ public class planets : MonoBehaviour {
 		Camera.main.GetComponent<gameEngine>().DeOrbit(this);
 		Debug.Log("Planet Destroyed");
 		Destroy(gameObject);
+	}
+
+	private void ResizeAnim()
+	{
+		transform.localScale = Vector3.Lerp(transform.localScale,
+			startSize, 4f * Time.deltaTime);
+		if (transform.localScale == prevSize)
+		{
+			isResized = true;
+			anim.enabled = true;
+		}
+		prevSize = transform.localScale;
 	}
 }

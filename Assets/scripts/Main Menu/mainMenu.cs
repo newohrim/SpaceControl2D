@@ -19,7 +19,7 @@ public class mainMenu : MonoBehaviour {
 	void Start () {
 		for(int i = 0; i < angle.Length; i++)
 		{
-			angle[i] = Random.Range(0, 100);
+			angle[i] = Mathf.PI;
 		}
 	}
 	
@@ -32,8 +32,8 @@ public class mainMenu : MonoBehaviour {
 		{
 			if(Moons[i] != null)
 			{
-				angle[i] += rotateSpeed * Time.deltaTime;
 				Moons[i].position = planets.OrbitalPosition(angle[i], i + 2, Earth.transform.position);
+				angle[i] += rotateSpeed * Time.deltaTime;
 			}
 		}
 

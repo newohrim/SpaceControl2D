@@ -1,0 +1,39 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<GuideContent xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <localizations>
+    <Localization lang="Russian">
+      <lines>
+        <string>Это ваша планета</string>
+        <string>Она хочет жить</string>
+        <string>Притягивайте до трех планет</string>
+        <string>Каждая планета имеет некоторый заряд энергии</string>
+        <string>Заряд восполняется, когда в планету на вашей орбите попадает астероид</string>
+        <string>Если астероид попадет в вашу планету, ее атмосферный слой повредится</string>
+        <string>Когда у Луны полный заряд, нажмите на нее, чтобы получить временный бонус</string>
+        <string>Обратите внимание, что Луна начала мигать</string>
+        <string>Нажмите на Луну</string>
+        <string>Вы получили бонус неуязвимости</string>
+        <string>Находясь под этим бонусом, старайтесь поглотить как можно больше астероидов, чтобы увеличить счет</string>
+        <string>Свойства остальных планет вам предстоит узнать самостоятельно</string>
+        <string>Приятной игры</string>
+      </lines>
+    </Localization>
+	<Localization lang="English">
+      <lines>
+        <string>This is your planet</string>
+        <string>It wants to live</string>
+		<string>Pull up to three planets</string>
+        <string>Each planet has some charge of energy</string>
+        <string>The charge replenishes when an asteroid hits the planet on your orbit</string>
+        <string>If an asteroid hits your planet, its atmospheric layer will be damaged</string>
+        <string>When the moon has a full charge, click on it to get a temporary bonus</string>
+        <string>Note that the moon began to flash</string>
+        <string>Click on the moon</string>
+        <string>You have received an invulnerability bonus</string>
+        <string>While under this bonus, try to absorb as many asteroids as possible in order to increase your score</string>
+        <string>The properties of other planets you have to learn by playing</string>
+        <string>Have a nice game</string>
+      </lines>
+    </Localization>
+  </localizations>
+</GuideContent>

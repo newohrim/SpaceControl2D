@@ -21,7 +21,7 @@ public class gameEngine : MonoBehaviour {
 	public planets[] orbitedObjects;
 	public GameObject stars;
 	public int orbitCount = 3;
-	public Text pointsCount, rangeCount;
+	public Text pointsCounter, rangeCount;
 
 	[Header("Bonus Numbers")]
 	public float invulnerableTimer;
@@ -34,6 +34,11 @@ public class gameEngine : MonoBehaviour {
 	public Animator GameOverText;
 	public Animator FadeBackground;
 
+	[Header("Sounds")]
+	public AudioClip planetHit1;
+	public AudioClip planetHit2;
+	public AudioClip redPlanetBonusSound;
+
 	[HideInInspector]
 	public float health;
 	[HideInInspector]
@@ -42,6 +47,8 @@ public class gameEngine : MonoBehaviour {
 	public bool isHealing = false;
 	[HideInInspector]
 	public bool isSpeedBoosted = false;
+	[HideInInspector]
+	public int pointsCount = 0;
 
 	// [bonus timers]
 		float timerInVulnurable;
@@ -52,6 +59,7 @@ public class gameEngine : MonoBehaviour {
 
 	Vector3 mousePos, direction, prevPos;
 	Animator anim;
+	AudioSource AudioPlayer;
 	Vector2 prevOffset;
 	RaycastHit hit;
 	float score = 0;
@@ -71,8 +79,15 @@ public class gameEngine : MonoBehaviour {
 		Debug.Log("Best Score: " + bestScore);
 		health = MaxHealth;
 		anim = player.GetComponent<Animator>();
+		AudioPlayer = GetComponent<AudioSource>();
 		playerRealSpeed = playerSpeed;
 		RequestInterstitial();
+	}
+
+	void Update() 
+	{
+		if(!isStopped)
+			BonusManager();
 	}
 	
 	// Update is called once per frame
@@ -89,7 +104,7 @@ public class gameEngine : MonoBehaviour {
 		
 		if(!isStopped)
 		{
-			BonusManager();
+			//BonusManager();
 			ClickDetection();
 
 			if(health <= 0)
@@ -103,11 +118,7 @@ public class gameEngine : MonoBehaviour {
 				GameOver();
 			}
 
-			
-			//player.transform.position = new Vector3 (player.transform.position.x, player.transform.position.y, 0);
-			//range = range - (Time.deltaTime * rangeSpeed);
 			rangeCount.text = Mathf.Round(score).ToString();
-			pointsCount.text = orbited + "/" + orbitCount;
 			transform.position = Vector3.Lerp (transform.position, new Vector3(player.transform.position.x, player.transform.position.y, -10.0f), cameraSpeed * Time.deltaTime);
 			if(i == 0)
 			{
@@ -166,6 +177,7 @@ public class gameEngine : MonoBehaviour {
 						{
 							isInvulnerable = true;
 							timerInVulnurable = invulnerableTimer * planet.orbitLevel;
+							pointsCounter.GetComponent<Animator>().Play("counterActivate");
 						}
 						if(planet.Type == planets.PlanetType.GreenHealPlanet)
 						{
@@ -180,6 +192,7 @@ public class gameEngine : MonoBehaviour {
 							isSpeedBoosted = true;
 							timerSpeedBoost = speedBoostTime;
 							player.GetComponent<TrailRenderer>().enabled = true;
+							AudioPlayer.PlayOneShot(redPlanetBonusSound);
 						}
 					}
 					pl.GetComponent<Animator>().Play("munDestroy");
@@ -193,17 +206,19 @@ public class gameEngine : MonoBehaviour {
 	{ 
 		if(isInvulnerable)
 		{
-			Debug.Log(invulnerableTimer + " " + timerInVulnurable);
 			if(timerInVulnurable > 0) 
 			{
 				timerInVulnurable -= Time.deltaTime;
 				border.gameObject.SetActive(true);
+				pointsCounter.text = "x" + pointsCount;
 			}
 			else
 			{
 				timerInVulnurable = invulnerableTimer;
 				isInvulnerable = false;
 				border.gameObject.SetActive(false);
+				pointsCounter.GetComponent<Animator>().Play("counterDisable");
+				pointsCount = 0;
 			}
 		}
 		if(isHealing)
@@ -261,7 +276,6 @@ public class gameEngine : MonoBehaviour {
 				orbitedObjects [i] = obj;
 				orbited++;
 				obj.orbitLevel = i + 1;
-				Debug.Log(i + 1);
 				return;
 			}
 		}
@@ -310,6 +324,22 @@ public class gameEngine : MonoBehaviour {
 		if(isInvulnerable) score += damage / 5;
 
 		healthCounter.fillAmount = health / MaxHealth;
+	}
+
+	public void OnHitHandler(float damage)
+	{
+		anim.PlayInFixedTime("SimpleHit");
+		if (isInvulnerable) 
+		{
+			score++;
+			pointsCount++;
+			AudioPlayer.PlayOneShot(planetHit1);
+		}
+		else 
+		{
+			GetDamage(damage);
+			AudioPlayer.PlayOneShot(planetHit2);
+		}
 	}
 
 	public void AddHealth(float healthAmount)
@@ -412,7 +442,7 @@ public class gameEngine : MonoBehaviour {
 
     	// Initialize an InterstitialAd.
     	this.interstitial = new InterstitialAd(adUnitId);
-		AdRequest request = new AdRequest.Builder().AddTestDevice("ca-app-pub-3940256099942544/1033173712").Build();
+		AdRequest request = new AdRequest.Builder().Build();
 		this.interstitial.LoadAd(request);
 	}
 }
