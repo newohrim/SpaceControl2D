@@ -258,6 +258,9 @@ public class gameEngine : MonoBehaviour {
 	public void GameOver()
 	{
 		GameOverText.Play("GameOverTextOpen");
+		GameOverText.GetComponent<Text>().text = "Game Over";
+		if (Application.systemLanguage == SystemLanguage.Russian)
+			GameOverText.GetComponent<Text>().text = "Игра Окончена";
 		GameObject.Find("BestScore").GetComponent<Text>().text = "Best Score: " + bestScore.ToString();
 		isStopped = true;
 		GetComponent<spawnManager>().isSpawn = false;
@@ -318,8 +321,6 @@ public class gameEngine : MonoBehaviour {
 		{ 
 			health -= damage;
 			if(isHealing) endHealth -= damage;
-
-			//isHealing = false; // may be turn on
 		}
 		if(isInvulnerable) score += damage / 5;
 
@@ -333,11 +334,13 @@ public class gameEngine : MonoBehaviour {
 		{
 			score++;
 			pointsCount++;
+			AudioPlayer.volume = 0.5f;
 			AudioPlayer.PlayOneShot(planetHit1);
 		}
 		else 
 		{
 			GetDamage(damage);
+			AudioPlayer.volume = 1.0f;
 			AudioPlayer.PlayOneShot(planetHit2);
 		}
 	}

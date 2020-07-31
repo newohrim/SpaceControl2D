@@ -8,6 +8,7 @@ public class leaderboard : MonoBehaviour
     const string leaderboardID = "CgkIsci-0IAPEAIQAA";
     
     public Text DebugText;
+    public Button LeaderboardsButton;
 
     // Start is called before the first frame update
     void Start()
@@ -28,8 +29,8 @@ public class leaderboard : MonoBehaviour
         Social.localUser.Authenticate((bool success) => 
         { 
             if (!DebugText.enabled) return;
-            if (success) DebugText.text = "Logged in";
-            else DebugText.text = "Failed";
+            if (success) LeaderboardsButton.gameObject.SetActive(true);
+            else Debug.LogWarning("Sign in failed");
         });
     }
 
