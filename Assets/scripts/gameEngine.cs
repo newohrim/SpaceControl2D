@@ -109,12 +109,7 @@ public class gameEngine : MonoBehaviour {
 
 			if(health <= 0)
 			{
-				Debug.Log("Game Over");
-				if (score > bestScore) 
-				{
-					SaveScore();
-					leaderboard.AddScoreToLeaderboard(GPGSIds.leaderboard_best_scores_world, (long)bestScore);
-				}
+				
 				GameOver();
 			}
 
@@ -257,6 +252,12 @@ public class gameEngine : MonoBehaviour {
 
 	public void GameOver()
 	{
+		Debug.Log("Game Over");
+		if (score > bestScore) 
+		{
+			SaveScore();
+		}
+		leaderboard.AddScoreToLeaderboard(GPGSIds.leaderboard_best_scores_world, (long)bestScore);
 		GameOverText.Play("GameOverTextOpen");
 		GameOverText.GetComponent<Text>().text = "Game Over";
 		if (Application.systemLanguage == SystemLanguage.Russian)
