@@ -20,8 +20,7 @@ public class Asteroid : MonoBehaviour, IAsteroid {
 	}
 	
 	// Update is called once per frame
-	void FixedUpdate () {
-		//direction = player.position - transform.position;
+	void Update () {
 		transform.Translate(direction.normalized * speed * Time.deltaTime);
 	}
 

@@ -5,9 +5,7 @@ using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
 using GoogleMobileAds.Api;
 
-
 public class gameEngine : MonoBehaviour {
-	public bool TestAds = true;
 	public GameObject player;
 	public Animator border;
 	public Image healthCounter;
@@ -23,12 +21,15 @@ public class gameEngine : MonoBehaviour {
 	public int orbitCount = 3;
 	public Text pointsCounter, rangeCount;
 
+	[Header("Ads")]
+	[SerializeField]
+	private bool TestAds = false;
+	[SerializeField]
+	private bool adsEnabled = true;
+
 	[Header("Bonus Numbers")]
-	public float invulnerableTimer;
-	public float healSpeed;
-	public float healAmount;
-	public float speedBoost;
-	public float speedBoostTime;
+	[SerializeField]
+	private BonusManager bonusManager;
 
 	[Header("UI Values")]
 	public Animator GameOverText;
@@ -39,21 +40,8 @@ public class gameEngine : MonoBehaviour {
 	public AudioClip planetHit2;
 	public AudioClip redPlanetBonusSound;
 
-	[HideInInspector]
-	public float health;
-	[HideInInspector]
-	public bool isInvulnerable = false;
-	[HideInInspector]
-	public bool isHealing = false;
-	[HideInInspector]
-	public bool isSpeedBoosted = false;
-	[HideInInspector]
-	public int pointsCount = 0;
-
-	// [bonus timers]
-		float timerInVulnurable;
-		float timerSpeedBoost;
-	// [/end]
+	private float health = 100.0f;
+	private int pointsCount = 0;
 
 	public Vector3 MoveSpot { get; set; }
 
@@ -70,32 +58,43 @@ public class gameEngine : MonoBehaviour {
 	float endHealth;
 	float newHealthAmount;
 	float bestScore = 0;
+	private float speedMultiplier = 1.0f;
 
 	private InterstitialAd interstitial;
 	
-	// Use this for initialization
 	void Start () {
 		LoadScore();
+		bonusManager.Initialize();
 		Debug.Log("Best Score: " + bestScore);
 		health = MaxHealth;
 		anim = player.GetComponent<Animator>();
 		AudioPlayer = GetComponent<AudioSource>();
 		playerRealSpeed = playerSpeed;
-		RequestInterstitial();
+		if (adsEnabled)
+			RequestInterstitial();
 	}
 
 	void Update() 
 	{
-		if(!isStopped)
-			BonusManager();
+		if(!isStopped) 
+		{
+			ClickDetection();
+			bonusManager.UpdateBonuses(this);
+			MoveAndGarbageStuff();
+		}
+		else
+		{
+			if(Input.GetKeyDown(KeyCode.Mouse0))
+			{
+				FadeBackground.Play("fadeOut");
+			}
+		}
 	}
-	
-	// Update is called once per frame
-	void FixedUpdate () {
 
+	void MoveAndGarbageStuff()
+	{
 		if(Physics.Raycast(GetComponent<Camera>().ScreenPointToRay(Input.mousePosition), out hit))
 		{
-			//Debug.Log (hit.transform.gameObject.tag);
 			if (hit.transform.gameObject.CompareTag ("background") && Vector3.Distance (player.transform.position, hit.point) >= 0.5f) 
 			{
 				mousePos = hit.point;
@@ -104,15 +103,6 @@ public class gameEngine : MonoBehaviour {
 		
 		if(!isStopped)
 		{
-			//BonusManager();
-			ClickDetection();
-
-			if(health <= 0)
-			{
-				
-				GameOver();
-			}
-
 			rangeCount.text = Mathf.Round(score).ToString();
 			transform.position = Vector3.Lerp (transform.position, new Vector3(player.transform.position.x, player.transform.position.y, -10.0f), cameraSpeed * Time.deltaTime);
 			if(i == 0)
@@ -124,7 +114,7 @@ public class gameEngine : MonoBehaviour {
 			{
 				MoveSpot = player.transform.position + new Vector3(direction.x, direction.y, 0) * playerSpeed;
 				Debug.DrawLine(player.transform.position, MoveSpot, Color.green);
-				player.transform.Translate (new Vector3(direction.x, direction.y, 0) * playerRealSpeed * Time.deltaTime);
+				player.transform.Translate (new Vector3(direction.x, direction.y, 0) * playerRealSpeed * speedMultiplier * Time.deltaTime);
 				i = 0;
 			}
 
@@ -140,21 +130,13 @@ public class gameEngine : MonoBehaviour {
 			}
 
 			prevPos = player.transform.position;
-			//Debug.Log (prevPos + " " + player.transform.position);
-
-		}
-		else
-		{
-			if(Input.GetKeyDown(KeyCode.Mouse0))
-			{
-				FadeBackground.Play("fadeOut");
-			}
 		}
 	}
 
 	void ClickDetection()
 	{
-		if(Input.GetKeyUp(KeyCode.Mouse0)){
+		if(Input.GetKeyUp(KeyCode.Mouse0))
+		{
 			RaycastHit _hit;
 			if(Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out _hit))
 			{
@@ -168,84 +150,25 @@ public class gameEngine : MonoBehaviour {
 						//Destroy(pl); // [ATTENTION] may cause errors
 						planet.isPowered = false;
 
-						if(planet.Type == planets.PlanetType.InVulnerableMun)
+						switch(planet.Type) 
 						{
-							isInvulnerable = true;
-							timerInVulnurable = invulnerableTimer * planet.orbitLevel;
-							pointsCounter.GetComponent<Animator>().Play("counterActivate");
-						}
-						if(planet.Type == planets.PlanetType.GreenHealPlanet)
-						{
-							// heal
-							isHealing = true;
-							newHealthAmount = healAmount/* * planet.orbitLevel*/;
-							endHealth = health + newHealthAmount;
-						}
-						if(planet.Type == planets.PlanetType.RedSpeedPlanet)
-						{
-							// speed boost
-							isSpeedBoosted = true;
-							timerSpeedBoost = speedBoostTime;
-							player.GetComponent<TrailRenderer>().enabled = true;
-							AudioPlayer.PlayOneShot(redPlanetBonusSound);
+							case planets.PlanetType.InVulnerableMun:
+								bonusManager.InvulnerablityBonus.Activate(this);
+								break;
+							case planets.PlanetType.GreenHealPlanet:
+								bonusManager.HealBonus.Activate(this);
+								break;
+							case planets.PlanetType.RedSpeedPlanet:
+								bonusManager.SpeedBonus.Activate(this);
+								break;
+							default:
+								Debug.LogError("Unknown planet type.");
+								break;
 						}
 					}
 					pl.GetComponent<Animator>().Play("munDestroy");
 					GetComponent<spawnManager>().munCount--;
 				}
-			}
-		}
-	}
-
-	void BonusManager()
-	{ 
-		if(isInvulnerable)
-		{
-			if(timerInVulnurable > 0) 
-			{
-				timerInVulnurable -= Time.deltaTime;
-				border.gameObject.SetActive(true);
-				pointsCounter.text = "x" + pointsCount;
-			}
-			else
-			{
-				timerInVulnurable = invulnerableTimer;
-				isInvulnerable = false;
-				border.gameObject.SetActive(false);
-				pointsCounter.GetComponent<Animator>().Play("counterDisable");
-				pointsCount = 0;
-			}
-		}
-		if(isHealing)
-		{	
-			if(health < endHealth && health <= MaxHealth)
-			{
-				health += healSpeed * Time.deltaTime;
-				anim.Play("healing");
-			}
-			else
-			{
-				isHealing = false;
-				anim.Play("New State");
-			}
-
-			if(health > MaxHealth) health = MaxHealth;
-
-			healthCounter.fillAmount = health / MaxHealth;
-		}
-		if(isSpeedBoosted)
-		{
-			if(timerSpeedBoost > 0)
-			{
-				timerSpeedBoost -= Time.deltaTime;
-				playerRealSpeed = playerSpeed * speedBoost;
-			}
-			else
-			{
-				isSpeedBoosted = false;
-				timerSpeedBoost = speedBoostTime;
-				playerRealSpeed = playerSpeed;
-				player.GetComponent<TrailRenderer>().enabled = false;
 			}
 		}
 	}
@@ -267,7 +190,7 @@ public class gameEngine : MonoBehaviour {
 		GetComponent<spawnManager>().isSpawn = false;
 
 		// Ads section
-		if(score < 10) return;
+		if(score < 10 || !adsEnabled) return;
 		if(interstitial.IsLoaded()) interstitial.Show();
 	}
 
@@ -318,20 +241,21 @@ public class gameEngine : MonoBehaviour {
 
 	public void GetDamage(float damage)
 	{
-		if(damage > 0 && !isInvulnerable)
+		if(damage > 0 && !bonusManager.InvulnerablityBonus.IsActive)
 		{ 
 			health -= damage;
-			if(isHealing) endHealth -= damage;
+			UpdateHealthCounter();
+			if(health <= 0)
+			{
+				GameOver();
+			}
 		}
-		if(isInvulnerable) score += damage / 5;
-
-		healthCounter.fillAmount = health / MaxHealth;
 	}
 
 	public void OnHitHandler(float damage)
 	{
 		anim.PlayInFixedTime("SimpleHit");
-		if (isInvulnerable) 
+		if (bonusManager.InvulnerablityBonus.IsActive) 
 		{
 			score++;
 			pointsCount++;
@@ -351,6 +275,46 @@ public class gameEngine : MonoBehaviour {
 		health += healthAmount;
 		if (healthAmount > MaxHealth)
 			health = MaxHealth;
+		UpdateHealthCounter();
+	}
+
+	public void SetSpeedMultiplier(float speedMultiplier)
+	{
+		this.speedMultiplier = speedMultiplier;
+	}
+
+	public void OnInvulnerableBegin()
+	{
+		border.gameObject.SetActive(true);
+		pointsCounter.GetComponent<Animator>().Play("counterActivate");
+	}
+
+	public void OnInvulnerableEnd()
+	{
+		border.gameObject.SetActive(false);
+		pointsCounter.GetComponent<Animator>().Play("counterDisable");
+		pointsCount = 0;
+	}
+	
+	public void OnHealingBegin()
+	{
+		anim.Play("healing");
+	}
+
+	public void OnHealingEnd()
+	{
+		anim.Play("New State");
+	}
+
+	public void OnSpeedUpBegin() 
+	{
+		player.GetComponent<TrailRenderer>().enabled = true;
+		AudioPlayer.PlayOneShot(redPlanetBonusSound);
+	}
+
+	public void OnSpeedUpEnd() 
+	{
+		player.GetComponent<TrailRenderer>().enabled = false;
 	}
 
 	public void OnButtonEnter(string func)
@@ -369,6 +333,11 @@ public class gameEngine : MonoBehaviour {
 				isShopOpen = false;
 			}
 		}
+	}
+
+	private void UpdateHealthCounter()
+	{
+		healthCounter.fillAmount = health / MaxHealth;
 	}
 
 	void SaveScore()

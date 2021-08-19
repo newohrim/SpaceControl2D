@@ -51,7 +51,7 @@ public class Guide : MonoBehaviour
         ReadXml();
     }
 
-    private void FixedUpdate() 
+    private void Update() 
     {
         offset += backgroundScrollSpeed * Time.deltaTime;
 		background.material.mainTextureOffset = new Vector2(offset, 0);

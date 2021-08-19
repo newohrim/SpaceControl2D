@@ -19,7 +19,7 @@ public class GreenAsteroid : MonoBehaviour, IAsteroid {
 	}
 	
 	// Update is called once per frame
-	void FixedUpdate () {
+	void Update () {
 		transform.Translate(direction.normalized * speed * Time.deltaTime);
 	}
 
